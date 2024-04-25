@@ -277,6 +277,7 @@ private:
     // ADD MORE DATA MEMBERS HERE, AS NECESSARY
     double resizeAlpha_;
     size_t size_;
+    size_t deletedSize_;
 };
 
 // ----------------------------------------------------------------------------
@@ -301,6 +302,7 @@ HashTable<K,V,Prober,Hash,KEqual>::HashTable(
     // Initialize any other data members as necessary
     resizeAlpha_ = resizeAlpha;
     size_ = 0;
+    deletedSize_ = 0;
     mIndex_ = 0; 
     totalProbes_ = 0;
 }
@@ -341,7 +343,7 @@ size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
-    if (size_ >= resizeAlpha_ * table_.size()) {
+    if (deletedSize_ >= resizeAlpha_ * table_.size()) {
         resize();
     }
 
@@ -353,10 +355,12 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
     if(table_[h] == nullptr) {
         table_[h] = new HashItem(p);
         size_++;
+        deletedSize_++;
     }
     else if (table_[h] -> deleted == true){
         table_[h] -> deleted = false;
         size_++;
+        deletedSize_++;
     }
     else {
         table_[h] -> item = p;
@@ -461,6 +465,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
     // std::cout << CAPACITIES[mIndex_] << std::endl;
 
     size_ = 0;
+    deletedSize_ = 0;
 
     // std::cout << "new table cap: " << table_.size() << std::endl;
 
