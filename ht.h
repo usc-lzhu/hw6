@@ -513,10 +513,8 @@ HASH_INDEX_T HashTable<K,V,Prober,Hash,KEqual>::probe(const KeyType& key) const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K, V, Prober, Hash, KEqual>::reportAll(std::ostream& out) const
 {
-    // std::cout << std::endl << "report all " << std::endl;
 	for(HASH_INDEX_T i = 0; i < CAPACITIES[mIndex_]; ++i)
 	{
-        // std::cout << i << std::endl;
 		if(table_[i] != nullptr)
 		{
 			out << "Bucket " << i << ": " << table_[i]->item.first << " " << table_[i]->item.second << std::endl;

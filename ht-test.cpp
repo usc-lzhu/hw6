@@ -48,6 +48,7 @@ int main()
     ht.remove("hi7");
     ht.remove("hi9");
     cout << "HT size: " << ht.size() << endl;
+    
     if( ht.find("hi9") != nullptr ){
         cout << "Found hi9" << endl;
     }
