@@ -102,10 +102,12 @@ public:
     // To be completed
     HASH_INDEX_T next() 
     {
+        // if probe fails to find item
         if( this->numProbes_ == this->m_ ) {
             return this->npos; 
         }
 
+        // step to next position
         HASH_INDEX_T loc = (this->start_ + (this->numProbes_ * dhstep_)) % this->m_;
         this->numProbes_++;
 
@@ -316,15 +318,13 @@ HashTable<K,V,Prober,Hash,KEqual>::~HashTable()
             delete table_[i];
         }
     }
-
-    // std::cout << "here" << std::endl;
-    // delete &(this -> table_);
 }
 
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 bool HashTable<K,V,Prober,Hash,KEqual>::empty() const
 {
+    // return true if size of undeleted items is zero
     if (this -> size() == 0) {
         return true;
     }
@@ -343,26 +343,38 @@ size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
+    // resize if loading factor is greater than or equal to the alpha threshold
     if (deletedSize_ >= resizeAlpha_ * table_.size()) {
         resize();
     }
 
+    // probe to the index of the given matching key item
     HASH_INDEX_T h = this->probe(p.first);
+
+    // probe failed
     if((h == npos)){
         throw std::logic_error("No free location to insert");
     }
 
+    // item doesn't exist in hashtable
     if(table_[h] == nullptr) {
+        // insert item into table
         table_[h] = new HashItem(p);
+        // update size members
         size_++;
         deletedSize_++;
     }
+    // item already exists in hashtable but was previously deleted
     else if (table_[h] -> deleted == true){
+        // update deleted flag and item value
         table_[h] -> deleted = false;
+        table_[h] -> item = p;
         size_++;
         deletedSize_++;
     }
+    // item already exists in hashtable
     else {
+        // update item value
         table_[h] -> item = p;
     }
 }
@@ -371,9 +383,14 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 {
+    // probe to the index of the given matching key item
     HASH_INDEX_T h = this->probe(key);
+
+    // delete if item exists in table
     if(h != npos && table_[h] != nullptr) {
+        // update deleted flag
         (table_[h] -> deleted) = true; 
+        // update size variable
         size_--;
     }
 }
@@ -449,43 +466,33 @@ typename HashTable<K,V,Prober,Hash,KEqual>::HashItem* HashTable<K,V,Prober,Hash,
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
+    // throw logic error if can't resize
     if (mIndex_ >= sizeof(CAPACITIES)/sizeof(CAPACITIES[0]) - 1) {
         throw std::logic_error("No more CAPACITIES exist");
     }
 
-    // std::cout << "here 1" << std::endl;
-    // std::cout << "old table cap: " << table_.size() << std::endl;
-    // reportAll(std::cout);
+    // use variable to keep track of original table
     std::vector<HashItem*> oldTable = table_;
 
+    // resize table to next greater prime value and be filled with nullptr values
     mIndex_++;
-    // table_ = *(new std::vector<HashItem*>(CAPACITIES[mIndex_], nullptr));
     table_.resize(CAPACITIES[mIndex_]);
     std::fill(table_.begin(), table_.end(), nullptr);
-    // std::cout << CAPACITIES[mIndex_] << std::endl;
 
+    // clear size variable
     size_ = 0;
     deletedSize_ = 0;
 
-    // std::cout << "new table cap: " << table_.size() << std::endl;
-
-    // reportAll(std::cout);
-
-    // std::cout << "\n\n" << std::endl;
-
+    // iterate through original table items
     for (size_t i = 0; i < oldTable.size(); ++i) {
-        // std::cout << i << std::endl;
+        // insert all undeleted items to new table
         if (oldTable[i] != nullptr && (oldTable[i] -> deleted) == false) {
             insert(oldTable[i] -> item);
-            // std::cout << "here" << std::endl;
         }
 
+        // delete old hash item
         delete oldTable[i];
     }
-
-    // reportAll(std::cout);
-
-
 }
 
 // Almost complete

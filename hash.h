@@ -31,6 +31,7 @@ struct MyStringHash {
         unsigned long long result = 0;
         unsigned long long subkeyResult = 0;
 
+        // recurse through entire string by 6-letter long substrings
         while (end >= 0) {
             if (end - 6 >= 0) {
                 start = end - 6;
@@ -39,6 +40,7 @@ struct MyStringHash {
                 start = 0;
             }
 
+            // calculate w[i] value using base conversion trick
             for (int i = start; i < end; ++i) {
                 subkeyResult = subkeyResult * 36 + letterDigitToNumber(k[i]);
             }
@@ -49,9 +51,8 @@ struct MyStringHash {
             end = end - 6;
         }
 
-
+        // calculate final hash value
         for (int i = 0; i < 5; ++i) {
-            // std::cout << "w[" << i << "] = " << w[i] << std::endl;
             result += rValues[i] * w[i];
         }
 
@@ -62,12 +63,16 @@ struct MyStringHash {
     HASH_INDEX_T letterDigitToNumber(char letter) const
     {
         // Add code here or delete this helper function if you do not want it
+        
+        // letter is a lower case alphabet letter
         if (letter >= 'a' && letter <= 'z') {
             return (letter - 'a');
         }
+        // letter is a upper case alphabet letter
         else if (letter >= 'A' && letter <= 'Z') {
             return (letter - 'A');
         }
+        // letter is a numerical digit
         else {
             return (letter - '0' + 26);
         }

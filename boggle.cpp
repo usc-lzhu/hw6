@@ -95,24 +95,30 @@ bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>
 								   std::string word, std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
 {
 //add your solution here!
+	// if current position is out of bounds
 	if (r >= board.size() || c >= board[0].size()) {
 		return false;
 	}
 
+	// update word
 	word += board[r][c];
 
 	// if current word is a valid word
 	if (dict.find(word) != dict.end()) {
+		// if future words aren't prefix/valid words, then current word is longest possible valid word
 		if (boggleHelper(dict, prefix, board, word, result, r + dr, c + dc, dr, dc) == false) {
 			result.insert(word);
 		}
 		
+		// return true so previous valid words aren't added to result set
 		return true;
 	}
 	// if current word is a prefix
 	else if (prefix.find(word) != prefix.end()) {
+		// recurse to next position
 		return boggleHelper(dict, prefix, board, word, result, r + dr, c + dc, dr, dc);
 	}
+	// if current word isn't a prefix/valid word
 	else {
 		return false;
 	}
